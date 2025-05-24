@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var AnonymousUser = &User{}
+
 type User struct {
 	ID        int64     `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
@@ -28,6 +30,10 @@ type password struct {
 var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
+
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
+}
 
 func (p *password) Set(plaintextPassword string) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(plaintextPassword), 12)
@@ -61,7 +67,7 @@ func ValidateEmail(v *validator.Validator, email string) {
 	v.Check(validator.Matches(email, validator.EmailRX), "email", "must be a valid email address")
 }
 
-func validatePasswordPlaintext(v *validator.Validator, password string) {
+func ValidatePasswordPlaintext(v *validator.Validator, password string) {
 	v.Check(password != "", "password", "must be provided")
 	v.Check(len(password) >= 8, "password", "must be at least 8 bytes long")
 	v.Check(len(password) <= 72, "password", "must not be more than 72 bytes long")
@@ -73,7 +79,7 @@ func ValidateUser(v *validator.Validator, user *User) {
 	ValidateEmail(v, user.Email)
 
 	if user.Password.plaintext != nil {
-		validatePasswordPlaintext(v, *user.Password.plaintext)
+		ValidatePasswordPlaintext(v, *user.Password.plaintext)
 	}
 
 	if user.Password.hash == nil {

@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"database/sql"
+	"expvar"
 	"flag"
 	"greenlight.tundeosborne/internal/data"
 	"greenlight.tundeosborne/internal/jsonlog"
 	"greenlight.tundeosborne/internal/mailer"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -81,7 +83,7 @@ func main() {
 		cfg.cors.trustedOrigins = strings.Fields(val)
 		return nil
 	})
-	
+
 	flag.Parse()
 
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
@@ -94,6 +96,20 @@ func main() {
 	defer db.Close()
 
 	logger.PrintInfo("database connection pool established", nil)
+
+	expvar.NewString("version").Set(version)
+
+	expvar.Publish("goroutines", expvar.Func(func() interface{} {
+		return runtime.NumGoroutine()
+	}))
+
+	expvar.Publish("database", expvar.Func(func() interface{} {
+		return db.Stats()
+	}))
+
+	expvar.Publish("timestamp", expvar.Func(func() interface{} {
+		return time.Now().Unix()
+	}))
 
 	app := &application{
 		config: cfg,

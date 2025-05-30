@@ -135,8 +135,6 @@ func main() {
 		logger.PrintFatal(err, nil)
 	}
 
-	//logger = jsonlog.New(os.Stdout, jsonlog.LevelInfo)
-
 }
 
 func openDB(cfg config) (*sql.DB, error) {

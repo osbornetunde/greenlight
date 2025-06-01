@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "go build -ldflags='-s -X main.buildTime=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\") -X main.version=railway' -o=./bin/api ./cmd/api"
+buildCommand = "go build -ldflags='-s -X main.buildTime=$(shell date -u +\"%Y-%m-%dT%H:%M:%SZ\") -X main.version=railway' -o=./bin/api ./cmd/api"
 
 [deploy]
 startCommand = "web"

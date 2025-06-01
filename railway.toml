@@ -6,4 +6,3 @@ buildCommand = "go build -ldflags='-s -X main.buildTime=$(date -u +\"%Y-%m-%dT%H
 startCommand = "web"
 healthcheckPath = "/v1/healthcheck"
 healthcheckTimeout = 300
-restartPolicyType = "on-failure"

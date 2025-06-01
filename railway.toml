@@ -1,8 +1,0 @@
-[build]
-builder = "nixpacks"
-buildCommand = "go build -ldflags='-s -X main.buildTime=$(shell date -u +\"%Y-%m-%dT%H:%M:%SZ\") -X main.version=$(shell git describe --always --dirty --tags --long)' -o=./api ./cmd/api"
-
-[deploy]
-startCommand = "web"
-healthcheckPath = "/v1/healthcheck"
-healthcheckTimeout = 300

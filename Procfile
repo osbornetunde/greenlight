@@ -1,1 +1,0 @@
-web: ./api -db-dsn=${DATABASE_URL} -port=${PORT}

@@ -1,0 +1,9 @@
+[build]
+builder = "nixpacks"
+buildCommand = "go build -ldflags='-s -X main.buildTime=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\") -X main.version=railway' -o=./api ./cmd/api"
+
+[deploy]
+startCommand = "web"
+healthcheckPath = "/v1/healthcheck"
+healthcheckTimeout = 300
+restartPolicyType = "on-failure"

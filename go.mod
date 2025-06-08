@@ -1,8 +1,6 @@
 module greenlight.tundeosborne
 
-go 1.23.0
-
-toolchain go1.23.5
+go 1.19
 
 require (
 	github.com/felixge/httpsnoop v1.0.1

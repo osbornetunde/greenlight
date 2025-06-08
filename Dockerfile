@@ -14,7 +14,8 @@ RUN go mod download
 COPY . .
 
 # Build the application with version information
-RUN CGO_ENABLED=0 go build -ldflags='-s -w -X main.version=1.0.0 -X main.buildTime=$(date -u +"%Y-%m-%dT%H:%M:%SZ")' -o=./bin/api ./cmd/api
+RUN buildTime=$(date -u +"%Y-%m-%dT%H:%M:%SZ") && \
+    CGO_ENABLED=0 go build -ldflags="-s -w -X main.version=1.0.0 -X main.buildTime=$buildTime" -o=./bin/api ./cmd/api
 
 # Stage 2: Create the final image
 FROM alpine:3.16
@@ -40,5 +41,5 @@ EXPOSE 4000
 # Set environment variables
 ENV PORT=4000
 
-# Command to run the application
-CMD /app/bin/api -db-dsn=${DATABASE_URL}
+# Command to run the application with configuration from Makefile
+CMD /app/bin/api -db-dsn=${DATABASE_URL} -port=${PORT} -env=production

@@ -2,8 +2,6 @@ module greenlight.tundeosborne
 
 go 1.23.5
 
-toolchain go1.23.5
-
 require (
 	github.com/felixge/httpsnoop v1.0.1
 	github.com/go-mail/mail/v2 v2.3.0

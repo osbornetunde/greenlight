@@ -1,5 +1,35 @@
 # Greenlight API
 
+## Docker Deployment
+
+This project includes a Dockerfile for containerized deployment. The Dockerfile:
+
+1. Builds the application in a Go environment
+2. Creates a minimal runtime image with only the necessary dependencies
+3. Sets up the application to run with proper permissions
+4. Configures environment variables for deployment
+
+### Building the Docker Image
+
+```bash
+docker build -t greenlight-api .
+```
+
+### Running the Docker Container Locally
+
+```bash
+docker run -p 4000:4000 -e DATABASE_URL=your_database_connection_string greenlight-api
+```
+
+### Deploying with Railway
+
+When deploying to Railway, the platform will automatically:
+1. Detect the Dockerfile and build the image
+2. Set up the necessary environment variables
+3. Deploy the container with the appropriate configuration
+
+Make sure to set the DATABASE_URL environment variable in your Railway project to connect to your PostgreSQL database.
+
 ## How to Deploy to Railway.com (Like You're 5 Years Old)
 
 Hello friend! Let's put our Greenlight app on the internet using Railway.com! It's like building a LEGO tower and showing it to everyone!

@@ -17,9 +17,11 @@ A modern RESTful API for managing movies with user authentication, permissions, 
    # Copy environment template
    make env/copy
    
-   # Edit .env file with your SMTP credentials
+   # Edit .env file with required configuration
    nano .env
-   # Set SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD
+   # REQUIRED: GREENLIGHT_DB_DSN (database connection)
+   # REQUIRED: SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, SMTP_SENDER
+   # Optional: PORT, ENV, CORS_TRUSTED_ORIGINS, LIMITER_ENABLED
    ```
 
 3. **Start the application:**
@@ -35,18 +37,20 @@ A modern RESTful API for managing movies with user authentication, permissions, 
 ### Without Docker
 
 1. **Prerequisites:**
-   - Go 1.21+ 
-   - PostgreSQL 14+
-   - migrate CLI tool
+   - Go 1.23.5+ 
+   - PostgreSQL 14+ (with `citext` extension support)
+   - migrate CLI tool (`go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest`)
 
 2. **Setup environment (Required):**
    ```bash
    # Copy example environment file
    make env/copy
    
-   # Edit .env file with your SMTP credentials
+   # Edit .env file with required configuration
    nano .env
-   # You MUST set SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD
+   # REQUIRED: GREENLIGHT_DB_DSN (database connection)
+   # REQUIRED: SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, SMTP_SENDER
+   # Optional: PORT, ENV, CORS_TRUSTED_ORIGINS, LIMITER_ENABLED
    
    # Check configuration
    make env/check
@@ -56,6 +60,9 @@ A modern RESTful API for managing movies with user authentication, permissions, 
    ```bash
    # Create database
    createdb greenlight
+   
+   # Enable required PostgreSQL extensions (run as superuser if needed)
+   psql greenlight -c "CREATE EXTENSION IF NOT EXISTS citext;"
    
    # Run migrations
    make db/migration/up
@@ -127,6 +134,9 @@ SMTP_SENDER=Greenlight <no-reply@greenlight.com>
 # CORS and Security
 CORS_TRUSTED_ORIGINS=http://localhost:3000 http://localhost:5173
 LIMITER_ENABLED=true
+
+# Note: Rate limiter RPS and burst are configured via command-line flags only:
+# -limiter-rps=2 (default) and -limiter-burst=4 (default)
 ```
 
 **🚨 Important:** Replace `your_actual_*` values with real credentials from your SMTP provider.
@@ -385,22 +395,15 @@ api:
     PORT: "4000"
     CORS_TRUSTED_ORIGINS: "http://localhost:5173 http://localhost:3000"
 
-    # Database (use DSN or component variables if supported)
-    DB_DSN: "postgres://greenlight:password@db:5432/greenlight?sslmode=disable"
-    # Or, if your build supports individual vars:
-    # DB_HOST: "db"
-    # DB_PORT: "5432"
-    # DB_NAME: "greenlight"
-    # DB_USER: "greenlight"
-    # DB_PASSWORD: "password"
-    # DB_SSLMODE: "disable"
+    # Database (REQUIRED - matches docker-compose db service)
+    GREENLIGHT_DB_DSN: "postgres://greenlight:greenlight@db:5432/greenlight?sslmode=disable"
+    DATABASE_URL: "postgres://greenlight:greenlight@db:5432/greenlight?sslmode=disable"  # For migrations
 
     # Rate limiting (optional)
-    # LIMITER_ENABLED: "true"
-    # LIMITER_RPS: "2"
-    # LIMITER_BURST: "4"
+    LIMITER_ENABLED: "true"
+    # Note: RPS and burst are command-line only: -limiter-rps=2 -limiter-burst=4
 
-    # SMTP (required)
+    # SMTP (required - replace with your actual credentials)
     SMTP_HOST: "sandbox.smtp.mailtrap.io"
     SMTP_PORT: "2525"
     SMTP_USERNAME: "your_actual_username"
@@ -449,6 +452,38 @@ docker run -p 4000:4000 \
   -e SMTP_PASSWORD="your-api-key" \
   greenlight-api
 ```
+
+## Command Line Flags
+
+The application supports various command-line flags that override environment variables:
+
+**Server Configuration:**
+- `-port=4000` - API server port (overrides PORT env var)
+- `-env=development` - Environment (overrides ENV env var)
+
+**Database Configuration:**
+- `-db-dsn="..."` - PostgreSQL DSN (overrides GREENLIGHT_DB_DSN env var)
+- `-db-max-open-conns=25` - Max open database connections
+- `-db-max-idle-conns=25` - Max idle database connections  
+- `-db-max-idle-time=15m` - Max connection idle time
+
+**Rate Limiting:**
+- `-limiter-enabled=true` - Enable rate limiter (overrides LIMITER_ENABLED env var)
+- `-limiter-rps=2` - Rate limiter requests per second (command-line only)
+- `-limiter-burst=4` - Rate limiter burst size (command-line only)
+
+**SMTP Configuration:**
+- `-smtp-host="..."` - SMTP host (overrides SMTP_HOST env var)
+- `-smtp-port=587` - SMTP port (overrides SMTP_PORT env var)
+- `-smtp-username="..."` - SMTP username (overrides SMTP_USERNAME env var)
+- `-smtp-password="..."` - SMTP password (overrides SMTP_PASSWORD env var)
+- `-smtp-sender="..."` - SMTP sender (overrides SMTP_SENDER env var)
+
+**CORS:**
+- `-cors-trusted-origins="origin1 origin2"` - Trusted CORS origins (overrides CORS_TRUSTED_ORIGINS env var)
+
+**Other:**
+- `-version` - Display version and build time
 
 ## Command Line Flags
 

@@ -135,8 +135,8 @@ LIMITER_ENABLED=true
 
 The application automatically loads your `.env` file on startup and reads configuration in this order (highest to lowest priority):
 
-1. **Command-line flags** (e.g., `-port=8080`, `-env=staging`, `-smtp-port=587`) - highest priority
-2. **Environment variables** (e.g., `export PORT=8080`, `export ENV=staging`) - overrides files
+1. **Environment variables** (e.g., `export PORT=8080`, `export ENV=staging`) - highest priority
+2. **Command-line flags** (e.g., `-port=8080`, `-env=staging`, `-smtp-port=587`) - override files
 3. **`.env.local` file values** (optional, git-ignored) - personal overrides
 4. **`.env` file values** - automatically loaded defaults
 5. **Error if not provided** - no hardcoded defaults (for required settings)
@@ -380,7 +380,27 @@ make compose/up
 ```yaml
 api:
   environment:
-    # Replace with your actual SMTP credentials
+    # App/runtime
+    ENV: "development"                       # development|staging|production
+    PORT: "4000"
+    CORS_TRUSTED_ORIGINS: "http://localhost:5173 http://localhost:3000"
+
+    # Database (use DSN or component variables if supported)
+    DB_DSN: "postgres://greenlight:password@db:5432/greenlight?sslmode=disable"
+    # Or, if your build supports individual vars:
+    # DB_HOST: "db"
+    # DB_PORT: "5432"
+    # DB_NAME: "greenlight"
+    # DB_USER: "greenlight"
+    # DB_PASSWORD: "password"
+    # DB_SSLMODE: "disable"
+
+    # Rate limiting (optional)
+    # LIMITER_ENABLED: "true"
+    # LIMITER_RPS: "2"
+    # LIMITER_BURST: "4"
+
+    # SMTP (required)
     SMTP_HOST: "sandbox.smtp.mailtrap.io"
     SMTP_PORT: "2525"
     SMTP_USERNAME: "your_actual_username"

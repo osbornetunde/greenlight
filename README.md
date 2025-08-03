@@ -1,5 +1,42 @@
 # Greenlight API
 
+## Local Development
+
+This section covers running the API locally for development (with or without Docker), database setup, and developer tooling.
+
+### Prerequisites
+- Go 1.21+ (or the version declared in go.mod)
+- PostgreSQL 14+ (local install or via Docker/Compose)
+- Make (optional but recommended)
+- curl (optional, for quick API tests)
+
+### Environment variables
+Create a `.env` file or export variables in your shell:
+- DATABASE_URL: Postgres connection string (e.g. postgres://user:pass@localhost:5432/greenlight?sslmode=disable)
+- SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD (if using mailer for activation emails)
+- PORT: API port (default 4000)
+- CORS_TRUSTED_ORIGINS: space-separated list of trusted origins (optional in dev)
+
+### Running locally with Go
+1. Install dependencies:
+   go mod download
+2. Set required env variables (see above).
+3. Run the server:
+   go run ./cmd/api
+4. Visit:
+   http://localhost:4000/v1/healthcheck
+
+### Using Makefile (if available)
+Common targets:
+- make run: Run the API locally
+- make test: Run tests
+- make build: Build the binary
+- make tidy: Go mod tidy and vendor updates
+
+### Database migrations
+If you manage migrations manually, run your migration tool to apply files in migrations/. Ensure your DATABASE_URL points to your development database.
+
+
 ## Docker Deployment
 
 This project includes a Dockerfile for containerized deployment. The Dockerfile:

@@ -1,0 +1,68 @@
+services:
+  db:
+    image: postgres:15
+    container_name: greenlight_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: greenlight
+      POSTGRES_PASSWORD: greenlight
+      POSTGRES_DB: greenlight
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greenlight -d greenlight"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrations:
+    image: greenlight-api:latest
+    container_name: greenlight_migrations
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://greenlight:greenlight@db:5432/greenlight?sslmode=disable
+    entrypoint: ["sh", "-lc"]
+    command: sh /app/scripts/migrate.sh up
+    restart: "no"
+
+  api:
+    # Build the image from the local Dockerfile for dev workflow.
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_TIME: "${BUILD_TIME}"
+        VERSION: "${VERSION}"
+    image: greenlight-api:latest
+    container_name: greenlight_api
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    environment:
+      # Internal DSN used by the application
+      GREENLIGHT_DB_DSN: postgres://greenlight:greenlight@db:5432/greenlight?sslmode=disable
+      # DATABASE_URL kept for migrate CLI (entrypoint optional)
+      DATABASE_URL: postgres://greenlight:greenlight@db:5432/greenlight?sslmode=disable
+      PORT: "4000"
+      # Disable inline migrations since we now run them in the migrations service
+      RUN_MIGRATIONS: "false"
+      # SMTP configuration - REPLACE WITH YOUR ACTUAL VALUES
+      # Sign up at https://mailtrap.io for development credentials
+      SMTP_HOST: "your-smtp-host-here"
+      SMTP_PORT: "2525"
+      SMTP_USERNAME: "your-smtp-username-here"
+      SMTP_PASSWORD: "your-smtp-password-here"
+      SMTP_SENDER: "Greenlight <no-reply@greenlight.com>"
+      # Optional CORS configuration
+      # CORS_TRUSTED_ORIGINS: http://localhost:3000 http://localhost:5173
+    ports:
+      - "4000:4000"
+
+volumes:
+  db_data:

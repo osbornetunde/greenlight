@@ -1117,6 +1117,20 @@ make audit
 3. **Testing:** Run `make audit` to format, vet, and test
 4. **Integration testing:** Use `curl` commands or Postman to test endpoints
 
+## TODO
+
+### Upcoming Features
+
+- [ ] **User Permission Management**
+  - Create endpoint to update and assign new permissions to a user
+  - Implement role-based access control system
+  - Add endpoints for managing user roles and capabilities
+
+- [ ] **User-Movie Associations**
+  - Map movies to users (favorites, watchlist, ratings, etc.)
+  - Create endpoint to fetch movies that belong to a specific user
+  - Implement user-specific movie collections and preferences
+
 ### Production Deployment
 
 For production deployment, consider:
